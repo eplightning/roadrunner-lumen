@@ -78,8 +78,8 @@ class Worker
         while ($psrRequest = $client->acceptRequest()) {
             try {
                 // allows full interception of requests by extensions
-                $handled = $this->extensionStack->beforeRequest($this->app, $client, $psrRequest);
-                if ($handled) {
+                $continue = $this->extensionStack->beforeRequest($this->app, $client, $psrRequest);
+                if (!$continue) {
                     continue;
                 }
 
