@@ -23,8 +23,6 @@ require_once 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 $config = null;
 
-echo __DIR__;
-
 try {
     $config = Config::createFromGlobals();
 } catch (RuntimeException $e) {
