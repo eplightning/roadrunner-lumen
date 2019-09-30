@@ -1,0 +1,44 @@
+{
+  "name": "eplightning/roadrunner-lumen",
+  "description": "RoadRunner <-> Lumen Integration",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "lumen",
+    "roadrunner"
+  ],
+  "authors": [
+    {
+      "email": "wrexdot@gmail.com",
+      "name": "Bartosz Sławianowski"
+    }
+  ],
+  "require": {
+    "php": ">=7.2.0",
+    "laravel/lumen-framework": "6.0.*",
+    "spiral/roadrunner": "~1.4",
+    "spiral/goridge": "^2.0",
+    "symfony/psr-http-message-bridge": "^1.2",
+    "zendframework/zend-diactoros": "^1.4.1 || ^2.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~8.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Eplightning\\RoadRunnerLumen\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "classmap": [
+      "tests/"
+    ]
+  },
+  "bin": [
+    "bin/rr-lumen-worker"
+  ],
+  "prefer-stable": true
+}

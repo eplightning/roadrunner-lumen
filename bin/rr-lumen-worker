@@ -1,0 +1,48 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+/**
+ * Entrypoint for RoadRunner worker.
+ */
+
+use Eplightning\RoadRunnerLumen\Config;
+use Eplightning\RoadRunnerLumen\Worker;
+
+ini_set('display_errors', 'stderr');
+
+$errorAndExit = function (string $error) {
+    fwrite(STDERR, $error . "\n");
+    exit(1);
+};
+
+if (!is_file('vendor' . DIRECTORY_SEPARATOR . 'autoload.php')) {
+    $errorAndExit('Composer\'s autoload.php file not found. Make sure worker\'s working directory is correct.');
+}
+
+require_once 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
+$config = null;
+
+echo __DIR__;
+
+try {
+    $config = Config::createFromGlobals();
+} catch (RuntimeException $e) {
+    $errorAndExit($e->getMessage());
+}
+
+// TODO: maybe make this work outside vendor directory
+$hacksDirectory = 'vendor' . DIRECTORY_SEPARATOR . 'eplightning' . DIRECTORY_SEPARATOR
+    . 'roadrunner-lumen' . DIRECTORY_SEPARATOR . 'hacks';
+
+if (is_dir($hacksDirectory)) {
+    foreach (new DirectoryIterator($hacksDirectory) as $file) {
+        if ($file->isFile() and $file->getExtension() === 'php') {
+            require $file->getPathname();
+        }
+    }
+}
+
+$worker = new Worker($config);
+$worker->init();
+$worker->serve();
