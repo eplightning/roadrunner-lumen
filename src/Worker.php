@@ -6,6 +6,7 @@ use Eplightning\RoadRunnerLumen\Extensions\ExtensionInterface;
 use Eplightning\RoadRunnerLumen\Extensions\ExtensionStack;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Application;
+use Psr\Http\Message\ResponseInterface;
 use Spiral\Goridge\RPC;
 use Spiral\RoadRunner\Metrics;
 use Spiral\RoadRunner\PSR7Client;
@@ -78,11 +79,12 @@ class Worker
         while ($psrRequest = $client->acceptRequest()) {
             try {
                 // allows full interception of requests by extensions
-                $continue = $this->extensionStack->beforeRequest($this->app, $client, $psrRequest);
-                if (!$continue) {
+                $handled = $this->extensionStack->handleRequest($this->app, $client, $psrRequest);
+                if ($handled) {
                     continue;
                 }
 
+                $this->extensionStack->beforeRequest($this->app, $psrRequest);
                 $request = Request::createFromBase($requestBridge->createRequest($psrRequest));
 
                 $this->extensionStack->beforeHandle($this->app, $request);
@@ -94,8 +96,15 @@ class Worker
 
                 $this->extensionStack->afterRequest($this->app, $psrRequest, $psrResponse);
             } catch (Throwable $e) {
-                $this->extensionStack->error($this->app, $psrRequest, $e);
-                $worker->error((string)$e);
+                $result = $this->extensionStack->error($this->app, $psrRequest, $e);
+
+                if ($result instanceof Throwable) {
+                    $worker->error((string)$result);
+                } else if ($result instanceof ResponseInterface) {
+                    $client->respond($result);
+                } else {
+                    $worker->error((string)$e);
+                }
             }
         }
 

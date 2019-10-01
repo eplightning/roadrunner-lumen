@@ -43,19 +43,28 @@ class ExtensionStack implements ExtensionInterface
      * @param Application $application
      * @param PSR7Client $client
      * @param ServerRequestInterface $request
-     * @return bool Should continue processing request?
+     * @return bool
      */
-    public function beforeRequest(Application $application, PSR7Client $client, ServerRequestInterface $request): bool
+    public function handleRequest(Application $application, PSR7Client $client, ServerRequestInterface $request): bool
     {
         foreach ($this->extensions as $extension) {
-            $continue = $extension->beforeRequest($application, $client, $request);
-
-            if (!$continue) {
-                return false;
+            if ($extension->handleRequest($application, $client, $request)) {
+                return true;
             }
         }
 
-        return true;
+        return false;
+    }
+
+    /**
+     * @param Application $application
+     * @param ServerRequestInterface $request
+     */
+    public function beforeRequest(Application $application, ServerRequestInterface $request): void
+    {
+        foreach ($this->extensions as $extension) {
+            $extension->beforeRequest($application, $request);
+        }
     }
 
     /**
@@ -122,11 +131,20 @@ class ExtensionStack implements ExtensionInterface
      * @param Application $application
      * @param ServerRequestInterface $request
      * @param Throwable $e
+     * @return null|ResponseInterface|Throwable
      */
-    public function error(Application $application, ServerRequestInterface $request, Throwable $e): void
+    public function error(Application $application, ServerRequestInterface $request, Throwable $e)
     {
+        $result = null;
+
         foreach ($this->extensions as $extension) {
-            $extension->error($application, $request, $e);
+            $newResult = $extension->error($application, $request, $e);
+
+            if (!is_null($newResult)) {
+                $result = $newResult;
+            }
         }
+
+        return $result;
     }
 }

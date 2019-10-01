@@ -17,11 +17,19 @@ abstract class AbstractExtension implements ExtensionInterface
      * @param Application $application
      * @param PSR7Client $client
      * @param ServerRequestInterface $request
-     * @return bool Should continue processing request?
+     * @return bool
      */
-    public function beforeRequest(Application $application, PSR7Client $client, ServerRequestInterface $request): bool
+    public function handleRequest(Application $application, PSR7Client $client, ServerRequestInterface $request): bool
     {
-        return true;
+        return false;
+    }
+
+    /**
+     * @param Application $application
+     * @param ServerRequestInterface $request
+     */
+    public function beforeRequest(Application $application, ServerRequestInterface $request): void
+    {
     }
 
     /**
@@ -82,8 +90,10 @@ abstract class AbstractExtension implements ExtensionInterface
      * @param Application $application
      * @param ServerRequestInterface $request
      * @param Throwable $e
+     * @return null|ResponseInterface|Throwable
      */
-    public function error(Application $application, ServerRequestInterface $request, Throwable $e): void
+    public function error(Application $application, ServerRequestInterface $request, Throwable $e)
     {
+        return null;
     }
 }
