@@ -90,7 +90,7 @@ abstract class AbstractExtension implements ExtensionInterface
      * @param Application $application
      * @param ServerRequestInterface $request
      * @param Throwable $e
-     * @return null|ResponseInterface|Throwable
+     * @return null|ResponseInterface|string
      */
     public function error(Application $application, ServerRequestInterface $request, Throwable $e)
     {

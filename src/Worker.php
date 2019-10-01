@@ -98,7 +98,7 @@ class Worker
             } catch (Throwable $e) {
                 $result = $this->extensionStack->error($this->app, $psrRequest, $e);
 
-                if ($result instanceof Throwable) {
+                if (is_string($result)) {
                     $worker->error((string)$result);
                 } else if ($result instanceof ResponseInterface) {
                     $client->respond($result);

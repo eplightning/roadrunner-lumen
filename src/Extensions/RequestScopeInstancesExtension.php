@@ -46,10 +46,12 @@ class RequestScopeInstancesExtension extends AbstractExtension
      * @param Application $application
      * @param ServerRequestInterface $request
      * @param Throwable $e
+     * @return null
      */
-    public function error(Application $application, ServerRequestInterface $request, Throwable $e): void
+    public function error(Application $application, ServerRequestInterface $request, Throwable $e)
     {
         $this->forgetInstances($application);
+        return null;
     }
 
     /**

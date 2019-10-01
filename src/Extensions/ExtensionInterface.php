@@ -82,7 +82,7 @@ interface ExtensionInterface
      * @param Application $application
      * @param ServerRequestInterface $request
      * @param Throwable $e
-     * @return Throwable|ResponseInterface|null
+     * @return string|ResponseInterface|null
      */
     public function error(Application $application, ServerRequestInterface $request, Throwable $e);
 
