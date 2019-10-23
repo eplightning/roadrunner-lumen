@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eplightning\RoadRunnerLumen;
 
@@ -17,7 +17,7 @@ class RelayFactory
      */
     public static function create(string $uri): RelayInterface
     {
-        if ($uri === 'pipe') {
+        if (in_array($uri, ['pipe', 'pipes'])) {
             return new StreamRelay(STDIN, STDOUT);
         }
 

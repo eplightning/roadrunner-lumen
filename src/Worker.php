@@ -94,16 +94,20 @@ class Worker
                 $psrResponse = $responseBridge->createResponse($response);
                 $client->respond($psrResponse);
 
-                $this->extensionStack->afterRequest($this->app, $psrRequest, $psrResponse);
+                if ($this->extensionStack->afterRequest($this->app, $psrRequest, $psrResponse)) {
+                    $worker->stop();
+                }
             } catch (Throwable $e) {
-                $result = $this->extensionStack->error($this->app, $psrRequest, $e);
+                $error = $this->extensionStack->error($this->app, $psrRequest, new WorkerError($e));
 
-                if (is_string($result)) {
-                    $worker->error((string)$result);
-                } else if ($result instanceof ResponseInterface) {
-                    $client->respond($result);
+                if ($error->getResult() instanceof ResponseInterface) {
+                    $client->respond($error->getResult());
                 } else {
-                    $worker->error((string)$e);
+                    $worker->error((string) $error->getResult());
+                }
+
+                if ($error->shouldTerminate()) {
+                    $worker->stop();
                 }
             }
         }

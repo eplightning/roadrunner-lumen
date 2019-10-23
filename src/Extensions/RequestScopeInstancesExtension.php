@@ -1,12 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eplightning\RoadRunnerLumen\Extensions;
 
+use Eplightning\RoadrunnerLumen\WorkerError;
+use Illuminate\Container\Container;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Laravel\Lumen\Application;
 use Psr\Http\Message\ServerRequestInterface;
-use Throwable;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Extension which clears specified container instances after request is processed
@@ -33,33 +33,33 @@ class RequestScopeInstancesExtension extends AbstractExtension
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Request $request
      * @param Response $response
      */
-    public function afterHandle(Application $application, Request $request, Response $response): void
+    public function afterHandle(Container $application, Request $request, Response $response): void
     {
         $this->forgetInstances($application);
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
-     * @param Throwable $e
-     * @return null
+     * @param WorkerError $e
+     * @return WorkerError
      */
-    public function error(Application $application, ServerRequestInterface $request, Throwable $e)
+    public function error(Container $application, ServerRequestInterface $request, WorkerError $e): WorkerError
     {
         $this->forgetInstances($application);
-        return null;
+        return $e;
     }
 
     /**
      * Forget instances
      *
-     * @param Application $application
+     * @param Container $application
      */
-    protected function forgetInstances(Application $application): void
+    protected function forgetInstances(Container $application): void
     {
         foreach ($this->abstracts as $abstract) {
             $application->forgetInstance($abstract);

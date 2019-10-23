@@ -1,99 +1,101 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eplightning\RoadRunnerLumen\Extensions;
 
 use Eplightning\RoadRunnerLumen\Config;
+use Eplightning\RoadrunnerLumen\WorkerError;
+use Illuminate\Container\Container;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Laravel\Lumen\Application;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\RoadRunner\PSR7Client;
-use Throwable;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractExtension implements ExtensionInterface
 {
     /**
-     * @param Application $application
+     * @param Container $application
      * @param PSR7Client $client
      * @param ServerRequestInterface $request
      * @return bool
      */
-    public function handleRequest(Application $application, PSR7Client $client, ServerRequestInterface $request): bool
+    public function handleRequest(Container $application, PSR7Client $client, ServerRequestInterface $request): bool
     {
         return false;
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
      */
-    public function beforeRequest(Application $application, ServerRequestInterface $request): void
+    public function beforeRequest(Container $application, ServerRequestInterface $request): void
     {
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
+     * @return bool
      */
     public function afterRequest(
-        Application $application,
+        Container $application,
         ServerRequestInterface $request,
         ResponseInterface $response
-    ): void {
+    ): bool {
+        return false;
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Request $request
      */
-    public function beforeHandle(Application $application, Request $request): void
+    public function beforeHandle(Container $application, Request $request): void
     {
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Request $request
      * @param Response $response
      */
-    public function afterHandle(Application $application, Request $request, Response $response): void
+    public function afterHandle(Container $application, Request $request, Response $response): void
     {
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Config $config
      * @return mixed
      */
-    public function init(Application $application, Config $config): void
+    public function init(Container $application, Config $config): void
     {
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @return mixed
      */
-    public function beforeLoop(Application $application): void
+    public function beforeLoop(Container $application): void
     {
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @return mixed
      */
-    public function afterLoop(Application $application): void
+    public function afterLoop(Container $application): void
     {
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
-     * @param Throwable $e
-     * @return null|ResponseInterface|string
+     * @param WorkerError $e
+     * @return WorkerError
      */
-    public function error(Application $application, ServerRequestInterface $request, Throwable $e)
+    public function error(Container $application, ServerRequestInterface $request, WorkerError $e): WorkerError
     {
-        return null;
+        return $e;
     }
 }

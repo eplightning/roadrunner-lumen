@@ -10,8 +10,10 @@ class RelayFactoryTest extends TestCase
     public function testPipe()
     {
         $pipe = RelayFactory::create('pipe');
+        $pipe2 = RelayFactory::create('pipes');
 
         $this->assertInstanceOf(StreamRelay::class, $pipe);
+        $this->assertInstanceOf(StreamRelay::class, $pipe2);
     }
 
     public function testTcpValid()

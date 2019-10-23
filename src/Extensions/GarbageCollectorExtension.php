@@ -1,8 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eplightning\RoadRunnerLumen\Extensions;
 
-use Laravel\Lumen\Application;
+use Illuminate\Container\Container;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -34,27 +34,30 @@ class GarbageCollectorExtension extends AbstractExtension
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
+     * @return bool
      */
     public function afterRequest(
-        Application $application,
+        Container $application,
         ServerRequestInterface $request,
         ResponseInterface $response
-    ): void {
+    ): bool {
         $this->handledRequests++;
 
         if ($this->handledRequests >= $this->requestLimit) {
             gc_collect_cycles();
             $this->handledRequests = 0;
         }
+
+        return false;
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      */
-    public function afterLoop(Application $application): void
+    public function afterLoop(Container $application): void
     {
         $this->handledRequests = 0;
     }

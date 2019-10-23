@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eplightning\RoadRunnerLumen\Extensions;
 
 use Eplightning\RoadRunnerLumen\Config;
+use Eplightning\RoadrunnerLumen\WorkerError;
+use Illuminate\Container\Container;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Laravel\Lumen\Application;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Spiral\RoadRunner\PSR7Client;
-use Throwable;
+use Symfony\Component\HttpFoundation\Response;
 
 class ExtensionStack implements ExtensionInterface
 {
@@ -29,10 +29,10 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Config $config
      */
-    public function init(Application $application, Config $config): void
+    public function init(Container $application, Config $config): void
     {
         foreach ($this->extensions as $extension) {
             $extension->init($application, $config);
@@ -40,12 +40,12 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param PSR7Client $client
      * @param ServerRequestInterface $request
      * @return bool
      */
-    public function handleRequest(Application $application, PSR7Client $client, ServerRequestInterface $request): bool
+    public function handleRequest(Container $application, PSR7Client $client, ServerRequestInterface $request): bool
     {
         foreach ($this->extensions as $extension) {
             if ($extension->handleRequest($application, $client, $request)) {
@@ -57,10 +57,10 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
      */
-    public function beforeRequest(Application $application, ServerRequestInterface $request): void
+    public function beforeRequest(Container $application, ServerRequestInterface $request): void
     {
         foreach ($this->extensions as $extension) {
             $extension->beforeRequest($application, $request);
@@ -68,25 +68,30 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
+     * @return bool
      */
     public function afterRequest(
-        Application $application,
+        Container $application,
         ServerRequestInterface $request,
         ResponseInterface $response
-    ): void {
+    ): bool {
+        $terminate = false;
+
         foreach ($this->extensions as $extension) {
-            $extension->afterRequest($application, $request, $response);
+            $terminate = ($extension->afterRequest($application, $request, $response) or $terminate);
         }
+
+        return $terminate;
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Request $request
      */
-    public function beforeHandle(Application $application, Request $request): void
+    public function beforeHandle(Container $application, Request $request): void
     {
         foreach ($this->extensions as $extension) {
             $extension->beforeHandle($application, $request);
@@ -94,11 +99,11 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Request $request
      * @param Response $response
      */
-    public function afterHandle(Application $application, Request $request, Response $response): void
+    public function afterHandle(Container $application, Request $request, Response $response): void
     {
         foreach ($this->extensions as $extension) {
             $extension->afterHandle($application, $request, $response);
@@ -106,10 +111,10 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @return mixed
      */
-    public function beforeLoop(Application $application): void
+    public function beforeLoop(Container $application): void
     {
         foreach ($this->extensions as $extension) {
             $extension->beforeLoop($application);
@@ -117,10 +122,10 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @return mixed
      */
-    public function afterLoop(Application $application): void
+    public function afterLoop(Container $application): void
     {
         foreach ($this->extensions as $extension) {
             $extension->afterLoop($application);
@@ -128,23 +133,17 @@ class ExtensionStack implements ExtensionInterface
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param ServerRequestInterface $request
-     * @param Throwable $e
-     * @return null|ResponseInterface|string
+     * @param WorkerError $e
+     * @return WorkerError
      */
-    public function error(Application $application, ServerRequestInterface $request, Throwable $e)
+    public function error(Container $application, ServerRequestInterface $request, WorkerError $e): WorkerError
     {
-        $result = null;
-
         foreach ($this->extensions as $extension) {
-            $newResult = $extension->error($application, $request, $e);
-
-            if (!is_null($newResult)) {
-                $result = $newResult;
-            }
+            $e = $extension->error($application, $request, $e);
         }
 
-        return $result;
+        return $e;
     }
 }

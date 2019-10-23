@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Eplightning\RoadRunnerLumen\Extensions;
 
 use Eplightning\RoadRunnerLumen\Config;
-use Laravel\Lumen\Application;
+use Illuminate\Container\Container;
 
 /**
  * Extension which resolves specified container bindings before starting worker loop.
@@ -30,10 +30,11 @@ class PreResolveExtension extends AbstractExtension
     }
 
     /**
-     * @param Application $application
+     * @param Container $application
      * @param Config $config
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function init(Application $application, Config $config): void
+    public function init(Container $application, Config $config): void
     {
         foreach ($this->abstracts as $abstract) {
             $application->make($abstract);
