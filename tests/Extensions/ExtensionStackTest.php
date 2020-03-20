@@ -6,8 +6,8 @@ use Eplightning\RoadRunnerLumen\WorkerError;
 use Illuminate\Container\Container;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
+use Nyholm\Psr7\Response;
+use Nyholm\Psr7\ServerRequest;
 
 class ExtensionStackTest extends TestCase
 {
@@ -22,7 +22,7 @@ class ExtensionStackTest extends TestCase
 
         $result = $stack->afterRequest(
             $this->mockContainer(),
-            new ServerRequest,
+            new ServerRequest('GET', '/'),
             new Response
         );
 
@@ -42,7 +42,7 @@ class ExtensionStackTest extends TestCase
 
         $result = $stack->afterRequest(
             $this->mockContainer(),
-            new ServerRequest,
+            new ServerRequest('GET', '/'),
             new Response
         );
 
@@ -63,7 +63,7 @@ class ExtensionStackTest extends TestCase
         $result = $stack->handleRequest(
             $this->mockContainer(),
             $this->prophesize(\Spiral\RoadRunner\PSR7Client::class)->reveal(),
-            new ServerRequest
+            new ServerRequest('GET', '/')
         );
 
         $this->assertEquals(true, $result);
@@ -81,7 +81,7 @@ class ExtensionStackTest extends TestCase
         $result = $stack->handleRequest(
             $this->mockContainer(),
             $this->prophesize(\Spiral\RoadRunner\PSR7Client::class)->reveal(),
-            new ServerRequest
+            new ServerRequest('GET', '/')
         );
 
         $this->assertEquals(false, $result);
@@ -99,7 +99,7 @@ class ExtensionStackTest extends TestCase
 
         $stack = new ExtensionStack($extensions);
 
-        $result = $stack->error($this->mockContainer(), new ServerRequest, $e1);
+        $result = $stack->error($this->mockContainer(), new ServerRequest('GET', '/'), $e1);
 
         $this->assertEquals($e2, $result);
     }

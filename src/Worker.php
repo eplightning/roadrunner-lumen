@@ -10,7 +10,8 @@ use Psr\Http\Message\ResponseInterface;
 use Spiral\Goridge\RPC;
 use Spiral\RoadRunner\Metrics;
 use Spiral\RoadRunner\PSR7Client;
-use Symfony\Bridge\PsrHttpMessage\Factory\DiactorosFactory;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Bridge\PsrHttpMessage\Factory\HttpFoundationFactory;
 use Symfony\Bridge\PsrHttpMessage\HttpMessageFactoryInterface;
 use Throwable;
@@ -152,8 +153,9 @@ class Worker
      */
     protected function createPsr7Client(\Spiral\RoadRunner\Worker $worker): PSR7Client
     {
-        // TODO: Try other PSR17 implementations
-        return new PSR7Client($worker);
+        $factory = new Psr17Factory();
+
+        return new PSR7Client($worker, $factory, $factory, $factory);
     }
 
     /**
@@ -161,7 +163,8 @@ class Worker
      */
     protected function createResponseBridge(): HttpMessageFactoryInterface
     {
-        // TODO: Try other PSR17 implementations
-        return new DiactorosFactory();
+        $factory = new Psr17Factory();
+
+        return new PsrHttpFactory($factory, $factory, $factory, $factory);
     }
 }
