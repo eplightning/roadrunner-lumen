@@ -15,7 +15,7 @@
   ],
   "require": {
     "php": ">=7.2.0",
-    "laravel/lumen-framework": "~6.0 || ~7.0",
+    "laravel/lumen-framework": "~6.0 || ~7.0 || ~8.0",
     "spiral/roadrunner": "~1.4",
     "spiral/goridge": "^2.0",
     "symfony/psr-http-message-bridge": "^1.2 || ^2.0",
